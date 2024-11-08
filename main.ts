@@ -1,19 +1,21 @@
-import {
-  App,
-  Notice,
-  Plugin,
-  PluginSettingTab,
-  Setting,
-} from "obsidian";
+import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
 
 // Remember to rename these classes and interfaces!
 
-interface IssueTrackerSyncSettings {
+interface TrackerSettings {
   targetFolder: string;
 }
 
-const DEFAULT_SETTINGS: IssueTrackerSyncSettings = {
+interface IssueTrackerSyncSettings {
+  trackers: Array<TrackerSettings>;
+}
+
+const DEFAULT_TRACKER_SETTINGS: TrackerSettings = {
   targetFolder: "",
+};
+
+const DEFAULT_SETTINGS: IssueTrackerSyncSettings = {
+  trackers: [],
 };
 
 export default class IssueTrackerSync extends Plugin {
@@ -79,18 +81,20 @@ class IssueTrackerSyncSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName("Target Folder (optional)")
+      .setName("Add new issue tracker")
       .setDesc(
-        "The relative path to the parent folder to sync from issue trackers",
+        "Add new issue tracker settings. When added, a new tab will appear",
       )
-      .addText((text) =>
-        text
-          .setPlaceholder("Enter target folder")
-          .setValue(this.plugin.settings.targetFolder)
-          .onChange(async (value) => {
-            this.plugin.settings.targetFolder = value;
+      .addButton((button) => {
+        button
+          .setTooltip("Add new issue tracker")
+          .setButtonText("+")
+          .setCta()
+          .onClick(async () => {
+            this.plugin.settings.trackers.push(DEFAULT_TRACKER_SETTINGS);
             await this.plugin.saveSettings();
-          }),
-      );
+            this.display();
+          });
+      });
   }
 }
