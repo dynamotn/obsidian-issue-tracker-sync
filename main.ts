@@ -1,6 +1,5 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
-
-// Remember to rename these classes and interfaces!
+import { Tab } from "./src/tab";
 
 interface TrackerSettings {
   targetFolder: string;
@@ -68,6 +67,11 @@ export default class IssueTrackerSync extends Plugin {
 }
 
 class IssueTrackerSyncSettingTab extends PluginSettingTab {
+  navContainer: HTMLElement;
+  tabNavEl: HTMLDivElement;
+  settingsContentEl: HTMLDivElement;
+  private selectedTab = "";
+
   plugin: IssueTrackerSync;
 
   constructor(app: App, plugin: IssueTrackerSync) {
@@ -96,5 +100,28 @@ class IssueTrackerSyncSettingTab extends PluginSettingTab {
             this.display();
           });
       });
+
+    this.navContainer = containerEl.createEl("nav", {
+      cls: "its-setting-header",
+    });
+    this.tabNavEl = this.navContainer.createDiv("its-setting-tab-group");
+    this.settingsContentEl = containerEl.createDiv("its-setting-content");
+
+    this.plugin.settings.trackers.forEach((tracker, index) => {
+      this.addTab(
+        new Tab(
+          this.tabNavEl,
+          this.settingsContentEl,
+          `Tracker ${index}`,
+          this.plugin,
+          index,
+          this.app,
+        ),
+      );
+    });
+  }
+
+  private addTab(tab: Tab) {
+    tab.navButton.onclick = () => {};
   }
 }
